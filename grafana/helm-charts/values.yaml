@@ -1,0 +1,14 @@
+### APP VAR ###
+IMAGE_NAME: "grafana"
+APP_VERSION: "7.5.2"
+NAMESPACE: ""
+REPOSITORY: "192.168.0.56:32100/docker-external"
+### SERVICE VAR ###
+SERVICE_TYPE: "NodePort"
+PORT: "3000"
+NODE_PORT: "30000"
+### VOLUMES VAR ###
+PV_NAME: "grafana-data-pv"
+PVC_NAME: "grafana-data-pvc"
+NFS_SERVER: "192.168.0.150"
+NFS_PATH: "/srv/grafana-data"

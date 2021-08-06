@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .Values.APP.IMAGE_NAME }}
+  name: {{ .Values.APP.IMAGE_NAME }}
+spec:
+  replicas: {{ .Values.APP.REPLICAS }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: {{ .Values.APP.IMAGE_NAME }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.APP.IMAGE_NAME }}
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: "8080"
+    spec:
+      containers:
+        - env:
+          - name: WEBURL
+            value: {{ .Values.APP.WEB_URL }}
+          - name: HTTPD_LISTENURL
+            value: {{ .Values.APP.HTTPD_LISTENURL }}
+          - name: AUTH_TYPE
+            value: {{ .Values.APP.AUTH_TYPE }}
+          {{ if eq .Values.APP.AUTH_TYPE "OAUTH" }}
+          - name: OAUTH_KEYCLOAK_CLIENT_ID
+            value: {{ .Values.APP.OAUTH_KEYCLOAK_CLIENT_ID }}
+          - name: OAUTH_KEYCLOAK_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: secret
+                name: {{ .Values.APP.OAUTH_KEYCLOAK_CLIENT_SECRET }}
+          - name: OAUTH_KEYCLOAK_REALM
+            value: {{ .Values.APP.OAUTH_KEYCLOAK_REALM }}
+          - name: OAUTH_KEYCLOAK_ROOT_URL
+            value: {{ .Values.APP.OAUTH_KEYCLOAK_ROOT_URL }}
+          {{ end }}
+          - name: GERRIT_INIT_ARGS
+            value: --install-all-plugins
+          - name: LISTEN_ADDR
+            value: '*:30289'
+          name: {{ .Values.APP.IMAGE_NAME }}
+          image: "{{ .Values.APP.REPOSITORY }}/{{ .Values.APP.IMAGE_NAME }}"
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+            requests:
+              memory: "512Mi"
+              cpu: "100m"
+          ports:
+            - containerPort: 30289
+              name: ssh
+              protocol: TCP
+            - containerPort: 8080
+              name: web
+              protocol: TCP
+          volumeMounts:
+            - name: gerrit-data
+              mountPath: /var/gerrit/review_site
+      {{ if .Values.APP.NODE_SELECTOR }}
+      nodeSelector:
+        kubernetes.io/hostname: '{{ .Values.APP.NODE_SELECTOR }}'
+      tolerations:
+      - key: role
+        operator: Equal
+        value: large
+        effect: NoSchedule
+      {{ end }}
+      volumes:
+        - name: {{ .Values.VOLUMES.PV_NAME}}
+          persistentVolumeClaim:
+            claimName: {{ .Values.VOLUMES.PVC_NAME }}

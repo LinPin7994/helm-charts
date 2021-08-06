@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name:  {{ .Values.IMAGE_NAME }}
+spec:
+  type: {{ .Values.SERVICE_TYPE }}
+  ports:
+    - port: {{ .Values.PORT }}
+      protocol: TCP
+      targetPort: http-grafana
+      {{ if eq .Values.SERVICE_TYPE "NodePort" }}
+      nodePort: {{ .Values.NODE_PORT }}
+      {{ end }}
+  selector:
+    app: {{ .Values.IMAGE_NAME }}
