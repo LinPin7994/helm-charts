@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.APP.IMAGE_NAME }}
+spec:
+  replicas: {{ .Values.APP.REPLICAS }}
+  selector:
+    matchLabels:
+      app: {{ .Values.APP.IMAGE_NAME }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.APP.IMAGE_NAME }}
+    spec:
+      containers:
+        - name: nexus
+          image: "{{ .Values.APP.REPOSITORY }}/{{ .Values.APP.IMAGE_NAME }}:{{ .Values.APP.APP_VERSION }}"
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: "{{ .Values.APP.MEMORY_LIMIT }}"
+              cpu: "{{ .Values.APP.CPU_LIMIT }}"
+            requests:
+              memory: "{{ .Values.APP.MEMORY_REQUEST }}"
+              cpu: "{{ .Values.APP.CPU_REQUEST }}"
+          ports:
+            - containerPort: 8081
+            - containerPort: 5000
+          volumeMounts:
+            - name: nexus-data
+              mountPath: /nexus-data
+      {{ if .Values.APP.NODE_SELECTOR }}
+      nodeSelector:
+        kubernetes.io/hostname: '{{ .Values.APP.NODE_SELECTOR }}'
+      tolerations:
+      - key: role
+        operator: Equal
+        value: large
+        effect: NoSchedule
+      {{ end }}
+      volumes:
+        - name: nexus-data
+          persistentVolumeClaim:
+            claimName: {{ .Values.VOLUMES.PVC_NAME }}

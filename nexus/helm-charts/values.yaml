@@ -1,0 +1,21 @@
+APP:
+  IMAGE_NAME: "nexus3"
+  APP_VERSION: "latest"
+  NAMESPACE: ""
+  REPLICAS: "1"
+  CPU_REQUEST: "500m"
+  MEMORY_REQUEST: "2Gi"
+  CPU_LIMIT: "1000m"
+  MEMORY_LIMIT: "3Gi"
+  NODE_SELECTOR: "worker-node-4"
+  REPOSITORY: "sonatype"
+SERVICE:
+  SERVICE_TYPE: "NodePort"
+  NODE_PORT_HTTP: "32000"
+  NODE_PORT_DOCKER: "32001"
+VOLUMES:
+  PV_NAME: "nexus-data-pv"
+  PVC_NAME: "nexus-data-pvc"
+  NFS_SERVER: "192.168.0.150"
+  NFS_PATH: "/srv/nexus-data"
+  CAPACITY: "10Gi"

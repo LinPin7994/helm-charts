@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.APP.IMAGE_NAME }}
+  annotations:
+      prometheus.io/scrape: 'true'
+      prometheus.io/path:   /
+      prometheus.io/port:   '8081'
+spec:
+  selector:
+    app: {{ .Values.APP.IMAGE_NAME }}
+  type: NodePort
+  ports:
+    - port: 8081
+      name: http
+      targetPort: 8081
+      nodePort: {{ .Values.SERVICE.NODE_PORT_HTTP }}
+    - port: 5000
+      targetPort: 5000
+      nodePort: {{ .Values.SERVICE.NODE_PORT_DOCKER }}
+      name: docker

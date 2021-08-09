@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.APP.IMAGE_NAME }}
+  labels:
+    app: {{ .Values.APP.IMAGE_NAME }}
+spec:
+  replicas: {{ .Values.APP.REPLICAS }}
+  selector:
+    matchLabels:
+      app: {{ .Values.APP.IMAGE_NAME }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.APP.IMAGE_NAME }}
+    spec:
+      containers:
+      - name: {{ .Values.APP.IMAGE_NAME }}
+        image: {{ .Values.APP.REPOSITORY }}/{{ .Values.APP.IMAGE_NAME }}/{{ .Values.APP.IMAGE_NAME }}:{{ .Values.APP.APP_VERSION }}
+        env:
+        - name: KEYCLOAK_USER
+          value: "{{ .Values.APP.KEYCLOAK_USER }}"
+        - name: KEYCLOAK_PASSWORD
+          value: "{{ .Values.APP.KEYCLOAK_PASSWORD }}"
+        - name: PROXY_ADDRESS_FORWARDING
+          value: "true"
+        - name: DB_VENDOR
+          value: {{ .Values.APP.DB_VENDOR }}
+        - name: DB_ADDR
+          value: {{ .Values.APP.DB_ADDR }}
+        - name: DB_DATABASE
+          value: {{ .Values.APP.DB_DATABASE }}
+        - name: DB_USER
+          value: {{ .Values.APP.DB_USER }}
+        - name: DB_PASSWORD
+          value: {{ .Values.APP.DB_PASSWORD }}
+        - name : KEYCLOAK_HTTP_PORT
+          value : "{{ .Values.APP.KEYCLOAK_HTTP_PORT }}"
+        - name: KEYCLOAK_HTTPS_PORT
+          value: "{{ .Values.APP.KEYCLOAK_HTTPS_PORT }}"
+          #   - name : KEYCLOAK_HOSTNAME
+          # value :  #replace with ingress URL
+        ports:
+        - name: http
+          containerPort: 8080
+        - name: https
+          containerPort: 8443
+        readinessProbe:
+          httpGet:
+            path: /auth/realms/master
+            port: 8080
+      {{ if .Values.APP.NODE_SELECTOR }}
+      nodeSelector:
+        kubernetes.io/hostname: '{{ .Values.APP.NODE_SELECTOR }}'
+      tolerations:
+      - key: role
+        operator: Equal
+        value: middle
+        effect: NoSchedule
+      {{ end }}

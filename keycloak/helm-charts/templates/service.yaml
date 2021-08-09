@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.APP.IMAGE_NAME }}
+  labels:
+    app: {{ .Values.APP.IMAGE_NAME }}
+spec:
+  ports:
+  - name: http
+    port: {{ .Values.SERVICE.TARGET_PORT_HTTP }}
+    targetPort: {{ .Values.SERVICE.TARGET_PORT_HTTP }}
+    nodePort: {{ .Values.SERVICE.NODE_PORT_HTTP }}
+  selector:
+    app: {{ .Values.APP.IMAGE_NAME }}
+  type: NodePort
