@@ -1,6 +1,6 @@
 ### APP VAR ###
 IMAGE_NAME: "grafana"
-APP_VERSION: "7.5.2"
+APP_VERSION: "7.5.2-test"
 NAMESPACE: ""
 REPOSITORY: "192.168.0.56:32100/docker-external"
 ### SERVICE VAR ###
